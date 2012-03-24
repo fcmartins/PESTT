@@ -12,12 +12,16 @@ public class CoverageDataController extends Observable {
 
 	private CoverageDataSet coverageDataMap;
 	
+	public void addObserver() {
+		coverageDataMap.addObserver();
+	}
+	
 	public CoverageDataController(CoverageDataSet coverageDataMap) {
 		this.coverageDataMap = coverageDataMap;
 	}
 
 	public void addCoverageData(Path<Integer> newTestPath, List<ICoverageData> newData) {
-		coverageDataMap.add(newTestPath, newData);
+		coverageDataMap.put(newTestPath, newData);
 	}
 
 	public void removeSelectedCoverageData(Path<Integer> path) {
@@ -28,7 +32,7 @@ public class CoverageDataController extends Observable {
 		return coverageDataMap.getData(path);
 	}
 	
-	public void clean() {
+	public void clearCoverageDataSet() {
 		coverageDataMap.clean();
 	}
 }

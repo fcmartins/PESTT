@@ -67,7 +67,7 @@ public class StatisticsSet extends Observable implements Iterable<String>{
 	}
 	
 	private int getTotalNodes() {
-		return graph.getNodes().size();
+		return graph.size();
 	}
 	
 	private String getEdgesStatistics(Set<Path<Integer>> selectedTestPaths) {

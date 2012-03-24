@@ -20,7 +20,7 @@ public class DotGraphVisitor<V extends Comparable<V>> extends DepthFirstGraphVis
 	
 	@Override
 	public void endVisit(Node<V> node) {
-		if(graph.getNodes().size() == 1)
+		if(graph.size() == 1)
 			dotString.append(node.getValue() + " [style=filled, fillcolor=violet]\n");
 		else if(graph.isInitialNode(node)) 
 			dotString.append(node.getValue() + " [style=filled, fillcolor=green]\n");

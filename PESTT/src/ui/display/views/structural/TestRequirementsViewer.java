@@ -62,7 +62,7 @@ public class TestRequirementsViewer extends AbstractTableViewer implements ITabl
 	public void update(Observable obs, Object data) {
 		if(data instanceof TestRequirementChangedEvent) {
 			if(((TestRequirementChangedEvent) data).hasInfinitePath)
-				MessageDialog.openInformation(parent.getShell(), Messages.TEST_REQUIREMENT_INPUT_TITLE, Messages.TEST_REQUIREMENT_INFINITE_MSG); // message displayed when the method contains cycles.
+				MessageDialog.openInformation(parent.getShell(), Messages.TEST_REQUIREMENT_TITLE, Messages.TEST_REQUIREMENT_INFINITE_MSG); // message displayed when the method contains cycles.
 			Set<AbstractPath<Integer>> testRequirements = new TreeSet<AbstractPath<Integer>>();
 			for(AbstractPath<Integer> path : ((TestRequirementChangedEvent) data).testRequirementSet)
 				testRequirements.add(path);
@@ -172,17 +172,15 @@ public class TestRequirementsViewer extends AbstractTableViewer implements ITabl
 		});
 		
 		testRequirementsViewer.getTable().addListener(SWT.Selection, new Listener() {
-		      @SuppressWarnings("unchecked")
+		    
 			public void handleEvent(Event event) {
 		        if(event.detail == SWT.CHECK)
 		        	for(TableItem item : testRequirementsViewer.getTable().getItems()) 
 		        		if(item == event.item) {
-		        			Activator.getDefault().getTestRequirementController().selectTestRequirement((AbstractPath<Integer>) item.getData());
+		        			Activator.getDefault().getEditorController().removeALLMarkers();
 		        			if(item.getChecked())
-		        			//	Activator.getDefault().getEditorController().addJavadocTagAnnotation(JavadocTagAnnotations.INFEASIBLE_PATH, item.getText(2));
 		        				Activator.getDefault().getTestRequirementController().enableInfeasible(Activator.getDefault().getTestRequirementController().getSelectedTestRequirement());
-		        			 else 
-		        			//	Activator.getDefault().getEditorController().removeJavadocTagAnnotation(JavadocTagAnnotations.INFEASIBLE_PATH, item.getText(2));
+		        			else 
 		        				Activator.getDefault().getTestRequirementController().disableInfeasible(Activator.getDefault().getTestRequirementController().getSelectedTestRequirement());
 		        		}
 		      }

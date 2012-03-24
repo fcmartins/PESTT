@@ -44,11 +44,19 @@ public class SourceGraphController {
 		return sourceGraph.numberOfNodes();
 	}
 	
-	public Map<JavadocTagAnnotations, List<String>> getJavadocTagAnnotations() {
-		return sourceGraph.getJavadocTagAnnotations();
-	} 
-	
 	public CompilationUnit getCompilationUnit(ICompilationUnit unit) {
 		return sourceGraph.getCompilationUnit(unit);
+	}
+
+	public void updateMetadataInformation(Graph<Integer> graph) {
+		sourceGraph.updateMetadataInformation(graph);
+	}
+	
+	public Map<JavadocTagAnnotations, List<String>> getJavadocAnnotations() {
+		return sourceGraph.getJavadocAnnotations();
+	}
+	
+	public byte[] getMethodHash() {
+		return sourceGraph.getMethodHash();
 	}
 }

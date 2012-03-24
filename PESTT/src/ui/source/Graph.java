@@ -12,7 +12,6 @@ import java.util.Set;
 
 import main.activator.Activator;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -26,7 +25,6 @@ import org.eclipse.zest.core.widgets.ZestStyles;
 
 import ui.constants.Colors;
 import ui.constants.Description;
-import ui.constants.Messages;
 import ui.events.LayerChangeEvent;
 import ui.events.LinkChangeEvent;
 import adt.graph.AbstractPath;
@@ -223,18 +221,9 @@ public class Graph implements Observer {
 		// select the nodes in the graph.	
 		Iterator<adt.graph.Node<Integer>> it = selectedTestRequirement.iterator();
 		adt.graph.Node<Integer> node = it.next();
-		while (it.hasNext()) { // through all node in the path.
+		while(it.hasNext()) { // through all node in the path.
 			adt.graph.Node<Integer> nextNode = it.next();
-			for(GraphNode gnode : graphNodes)  // through all nodes in the graph.
-				if(!gnode.isDisposed()) {
-					if(gnode.getData().equals(node)) { // if matches.
-						aux.add(gnode); // add node item to the list.
-						break;
-					}
-				} else {
-					MessageDialog.openInformation(parent.getShell(), Messages.COVERAGE_TITLE, Messages.NEED_UPDATE); // message displayed when the graph is not designed.
-					return null;
-				}
+			getGraphNode(aux, node);
 
 			// select the edges in the graph.
 			for(adt.graph.Edge<Integer> edge : sourceGraph.getNodeEdges((adt.graph.Node<Integer>) node))  // through all edges of the node.
@@ -246,7 +235,18 @@ public class Graph implements Observer {
 						}
 			node = nextNode;
 		}
+		getGraphNode(aux, node);
 		return aux;
+	}
+
+	private void getGraphNode(List<GraphItem> aux, adt.graph.Node<Integer> node) {
+		for(GraphNode gnode : graphNodes)  // through all nodes in the graph.
+			if(!gnode.isDisposed()) {
+				if(gnode.getData().equals(node)) { // if matches.
+					aux.add(gnode); // add node item to the list.
+					break;
+				}
+			}
 	}
 
 	private List<GraphItem> selectTestPathSet(Set<Path<Integer>> selectedTestPaths) {

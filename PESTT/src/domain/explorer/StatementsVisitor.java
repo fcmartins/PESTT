@@ -1,6 +1,9 @@
 package domain.explorer;
 
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,6 +58,7 @@ public class StatementsVisitor extends ASTVisitor {
 	private GraphInformation infos;
 	private CompilationUnit unit;
 	private Map<JavadocTagAnnotations, List<String>> javadocAnnotations;
+	private byte[] hash;
 
 	public StatementsVisitor(String methodName, CompilationUnit unit) {
 		this.methodName = methodName; // name of the method to be analyzed.
@@ -82,6 +86,7 @@ public class StatementsVisitor extends ASTVisitor {
 	@Override  
 	public boolean visit(MethodDeclaration node) {
 		if(node.getName().getIdentifier().equals(methodName)) {
+			hash = getMethodHash(node);
 			if(node.getJavadoc() != null) {
 				javadocAnnotations.put(JavadocTagAnnotations.COVERAGE_CRITERIA, getProperty(node.getJavadoc(), JavadocTagAnnotations.COVERAGE_CRITERIA.getTag()));
 				javadocAnnotations.put(JavadocTagAnnotations.INFEASIBLE_PATH, getProperty(node.getJavadoc(), JavadocTagAnnotations.INFEASIBLE_PATH.getTag()));
@@ -105,6 +110,19 @@ public class StatementsVisitor extends ASTVisitor {
 					result.add(str);
 				}
 		return result;
+	}
+	
+	private byte[] getMethodHash(MethodDeclaration method) {
+		try {
+			byte[] bytesOfMessage = method.getBody().toString().getBytes("UTF-8");
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			return md.digest(bytesOfMessage);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -136,12 +154,17 @@ public class StatementsVisitor extends ASTVisitor {
 				sourceGraph.addInitialNode(sourceGraph.getNodes().iterator().next());
 
 			RenumNodesGraphVisitor visitor = new RenumNodesGraphVisitor();
-				sourceGraph.accept(visitor);
+			sourceGraph.accept(visitor);
+			sourceGraph.sort();
 		} 	
 	}
-	
-	public Map<JavadocTagAnnotations, List<String>> getJavadocTagAnnotations() {
+
+	public Map<JavadocTagAnnotations, List<String>> getJavadocAnnotations() {
 		return javadocAnnotations;		
+	}
+	
+	public byte[] getMethodHash() {
+		return hash;
 	}
 
 	@Override  

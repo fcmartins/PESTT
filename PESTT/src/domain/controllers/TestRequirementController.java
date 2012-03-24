@@ -94,17 +94,16 @@ public class TestRequirementController extends Observable {
 			List<Node<Integer>> fromToNodes = new ArrayList<Node<Integer>>(2);
 			fromToNodes.add(sourceGraph.getSourceGraph().getNode(Integer.parseInt(insertedNodes.get(0))));
 			int i = 1; 
-			while (i < insertedNodes.size() && validPath) {
+			while(i < insertedNodes.size() && validPath) {
 				fromToNodes.add(sourceGraph.getSourceGraph().getNode(Integer.parseInt(insertedNodes.get(i))));
-				if (fromToNodes.get(0) != null && fromToNodes.get(1) != null && 
-						sourceGraph.getSourceGraph().isPath(new Path<Integer>(fromToNodes))) {
+				if(fromToNodes.get(0) != null && fromToNodes.get(1) != null && sourceGraph.getSourceGraph().isPath(new Path<Integer>(fromToNodes))) {
 					pathNodes.add(fromToNodes.get(0));
 					fromToNodes.remove(0);
 				} else
 					validPath = false;
 				i++;
 			}
-			if (validPath) {
+			if(validPath) {
 				pathNodes.add(fromToNodes.get(0));
 				return new Path<Integer>(pathNodes);
 			}

@@ -31,7 +31,6 @@ public class GraphInformation {
 
 	private adt.graph.Graph<Integer> sourceGraph;
 	private ui.source.Graph layoutGraph;
-	private ActiveEditor editor;
 	private ISelectionListener listener;
 	
 	public GraphInformation(ui.source.Graph layoutGraph) {
@@ -39,7 +38,6 @@ public class GraphInformation {
 	}
 	
 	public void setLayerInformation(Layer layer) {
-		editor = Activator.getDefault().getEditorController().getActiveEditor();
 		sourceGraph = Activator.getDefault().getSourceGraphController().getSourceGraph(); // set the sourceGraph.
 		switch(layer) {
 			case EMPTY:
@@ -83,7 +81,7 @@ public class GraphInformation {
 	@SuppressWarnings("unchecked")
 	private void addInformationToLayer2() {
 		if(!layoutGraph.getSelected().isEmpty()) { // verify if there are nodes selected.
-			editor.removeALLMarkers(); // removes the marks in the editor.
+			Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 			for(GraphItem item : layoutGraph.getSelected()) // through all graph items.
 				if(item instanceof GraphNode) { // verify if is a GraphNode.
 					adt.graph.Node<Integer> node = sourceGraph.getNode(Integer.parseInt(item.getText())); // get the node.
@@ -94,11 +92,11 @@ public class GraphInformation {
 						if(nodes != null) 
 							regionToSelect(nodes, MarkersType.LINK_MARKER); // select the area in the editor.
 						else 
-							editor.removeALLMarkers(); // removes the marks in the editor.
+							Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 					}
 				}
 		} else 
-			editor.removeALLMarkers(); // removes the marks in the editor.
+			Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 	}
 	
 	private List<ASTNode> getASTNodes(HashMap<ASTNode, Line> map) {
@@ -114,20 +112,20 @@ public class GraphInformation {
 		switch(instructions.getNodeType()) {
 			case ASTNode.IF_STATEMENT:
 			case ASTNode.DO_STATEMENT:
-				editor.createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 2)); // select the if or do words.
+				Activator.getDefault().getEditorController().createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 2)); // select the if or do words.
 				break;
 			case ASTNode.FOR_STATEMENT:
 			case ASTNode.ENHANCED_FOR_STATEMENT:
-				editor.createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 3)); // select the for word.
+				Activator.getDefault().getEditorController().createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 3)); // select the for word.
 				break;
 			case ASTNode.SWITCH_STATEMENT:
-				editor.createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 6)); // select the switch word.
+				Activator.getDefault().getEditorController().createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 6)); // select the switch word.
 				break;
 			case ASTNode.WHILE_STATEMENT:
-				editor.createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 5)); // select the while word.
+				Activator.getDefault().getEditorController().createMarker(markerType, start, getLength(start, instructions.getStartPosition(), 5)); // select the while word.
 				break;
 			default:
-				editor.createMarker(markerType, start, getLength(start, info.get(info.size() - 1).getStartPosition(), info.get(info.size() - 1).getLength())); // select the block of instructions associated to the selected node.
+				Activator.getDefault().getEditorController().createMarker(markerType, start, getLength(start, info.get(info.size() - 1).getStartPosition(), info.get(info.size() - 1).getLength())); // select the block of instructions associated to the selected node.
 				break;
 		}
 	}
@@ -147,8 +145,7 @@ public class GraphInformation {
 	@SuppressWarnings("unchecked")
 	public void setVisualCoverageStatus(ICoverageData data) {
 		sourceGraph = Activator.getDefault().getSourceGraphController().getSourceGraph(); // set the sourceGraph.
-		editor = Activator.getDefault().getEditorController().getActiveEditor();
-		editor.removeALLMarkers(); // removes the marks in the editor.
+		Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 		for(adt.graph.Node<Integer> node : sourceGraph.getNodes()) {
 			sourceGraph.selectMetadataLayer(Layer.INSTRUCTIONS.getLayer()); // select the layer to get the information.
 			HashMap<ASTNode, Line> map = (HashMap<ASTNode, Line>) sourceGraph.getMetadata(node); // get the information in this layer to this node.

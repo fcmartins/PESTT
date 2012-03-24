@@ -1,5 +1,9 @@
 package ui.editor;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
@@ -24,6 +28,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -31,12 +36,15 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import ui.constants.Description;
+import ui.constants.Messages;
 import adt.graph.AbstractPath;
 import adt.graph.Path;
+import domain.SourceGraph;
 import domain.constants.JavadocTagAnnotations;
 import domain.events.TestPathChangedEvent;
 import domain.events.TestRequirementChangedEvent;
@@ -50,7 +58,7 @@ public class ActiveEditor implements Observer {
 	private Markers marker; // marker to add.
 	private ICompilationUnit compilationUnit;
 	private IJavaProject javaProject;
-	private boolean listenUpdates; 
+	private boolean listenUpdates;
 
 	public ActiveEditor() {
 		listenUpdates = true;
@@ -177,39 +185,34 @@ public class ActiveEditor implements Observer {
 
 	@Override
 	public void update(Observable obs, Object data) {
-		if (listenUpdates) {
+		if(listenUpdates) {
 			CompilationUnit unit = Activator.getDefault().getSourceGraphController().getCompilationUnit(compilationUnit);
 			unit.recordModifications();
 			MethodDeclaration method = getMethodDeclaration(unit);
-			if(data instanceof TestRequirementSelectedCriteriaEvent) {
-				if(method != null && ((TestRequirementSelectedCriteriaEvent) data).selectedCoverageCriteria != null) {
+			if(method != null && Activator.getDefault().getTestRequirementController().isCoverageCriteriaSelected()) 
+				if(data instanceof TestRequirementSelectedCriteriaEvent) {
 					String criteria = ((TestRequirementSelectedCriteriaEvent) data).selectedCoverageCriteria.toString();
 					Iterable<AbstractPath<Integer>> infeasibles = Activator.getDefault().getTestRequirementController().getInfeasiblesTestRequirements();
 					Iterable<Path<Integer>> manuallyAdded = Activator.getDefault().getTestRequirementController().getTestRequirementsManuallyAdded();
 					Iterable<Path<Integer>> testPath = Activator.getDefault().getTestPathController().getTestPathsManuallyAdded();
-					setJavadocTagAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);
-				}			
-			} else if(data instanceof TestRequirementChangedEvent) {
-				if(method != null && Activator.getDefault().getTestRequirementController().isCoverageCriteriaSelected()) {
+					setJavadocAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);
+				} else if(data instanceof TestRequirementChangedEvent) {
 					String criteria = Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria().toString();
 					Iterable<AbstractPath<Integer>> infeasibles = ((TestRequirementChangedEvent) data).infeasigles;
 					Iterable<Path<Integer>> manuallyAdded = ((TestRequirementChangedEvent) data).manuallyAdded;
 					Iterable<Path<Integer>> testPath = Activator.getDefault().getTestPathController().getTestPathsManuallyAdded();
-					setJavadocTagAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);
-				}		
-			} else if(data instanceof TestPathChangedEvent) {
-				if(method != null && Activator.getDefault().getTestRequirementController().isCoverageCriteriaSelected()) {
+					setJavadocAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);	
+				} else if(data instanceof TestPathChangedEvent) {
 					String criteria = Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria().toString();
 					Iterable<AbstractPath<Integer>> infeasibles = Activator.getDefault().getTestRequirementController().getInfeasiblesTestRequirements();
 					Iterable<Path<Integer>> manuallyAdded = Activator.getDefault().getTestRequirementController().getTestRequirementsManuallyAdded();
 					Iterable<Path<Integer>> testPath =((TestPathChangedEvent) data).manuallyAdded;
-					setJavadocTagAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);
-				}			
-			}
+					setJavadocAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);		
+				}
 		}
 	}
 	
-	public void setJavadocTagAnnotation(CompilationUnit unit, MethodDeclaration method, String criteria, Iterable<AbstractPath<Integer>> infeasibles, Iterable<Path<Integer>> testRequireents, Iterable<Path<Integer>> testPath) {	
+	private void setJavadocAnnotation(CompilationUnit unit, MethodDeclaration method, String criteria, Iterable<AbstractPath<Integer>> infeasibles, Iterable<Path<Integer>> testRequireents, Iterable<Path<Integer>> testPath) {	
 		Javadoc javadoc = method.getAST().newJavadoc();
 		method.setJavadoc(javadoc);
 		createTag(method, JavadocTagAnnotations.COVERAGE_CRITERIA, criteria, javadoc);
@@ -217,10 +220,10 @@ public class ActiveEditor implements Observer {
 			createTag(method, JavadocTagAnnotations.INFEASIBLE_PATH, path.toString(), javadoc);
 		for(Path<Integer> path : testRequireents)
 			createTag(method, JavadocTagAnnotations.ADDITIONAL_TEST_REQUIREMENT_PATH, path.toString(), javadoc);
-		
 		for(Path<Integer> path : testPath)
 			createTag(method, JavadocTagAnnotations.ADDITIONAL_TEST_PATH, path.toString(), javadoc);
 		applychanges(unit);
+		verifyChanges(method);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -234,7 +237,7 @@ public class ActiveEditor implements Observer {
 	}
 	
 	private void applychanges(CompilationUnit unit) {
-		ITextEditor editor = (ITextEditor) part;
+		ITextEditor editor = (ITextEditor) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();;
 		IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
 		TextEdit edit = unit.rewrite(document, javaProject.getOptions(true));
 		try {
@@ -244,5 +247,42 @@ public class ActiveEditor implements Observer {
 		} catch (BadLocationException e) {
 			e.printStackTrace(); 
 		}
+	}
+
+	private void verifyChanges(MethodDeclaration method) {
+		byte[] currentHash = Activator.getDefault().getSourceGraphController().getMethodHash();
+		CompilationUnit unit = Activator.getDefault().getSourceGraphController().getCompilationUnit(compilationUnit);
+		unit.recordModifications();
+		MethodDeclaration temp = getMethodDeclaration(unit);
+		byte[] tempHash =  getMethodHash(temp);
+		boolean result = Arrays.equals(currentHash, tempHash) ? true : false;
+		if(result) {
+			Activator.getDefault().getEditorController().removeALLMarkers();
+			SourceGraph source = new SourceGraph(); 
+			source.create(compilationUnit, getSelectedMethod());
+			Activator.getDefault().getSourceGraphController().updateMetadataInformation(source.getSourceGraph());
+		} else {
+			try {
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private byte[] getMethodHash(MethodDeclaration method) {
+		try {
+			byte[] bytesOfMessage = method.getBody().toString().getBytes("UTF-8");
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			return md.digest(bytesOfMessage);
+			
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
+		
 	}
 }

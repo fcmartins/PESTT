@@ -1,5 +1,6 @@
 package domain.controllers;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import main.activator.Activator;
@@ -48,15 +50,20 @@ public class TestPathController extends Observable {
 	
 	public void addTestPath(Path<Integer> newTestPath) {
 		testPathSet.add(newTestPath);
+		List<ICoverageData> newData = new LinkedList<ICoverageData>();
+		newData.add(new CoverageData(newTestPath));
+		Activator.getDefault().getCoverageDataController().addCoverageData(newTestPath, newData);
 		selectTestPath(null);
 	}
 
 	public void removeTestPath() {
 		testPathSet.remove(selectedTestPaths);
+		for(Path<Integer> path : selectedTestPaths)
+			Activator.getDefault().getCoverageDataController().removeSelectedCoverageData(path);
 		selectTestPath(null);
 	}
 	
-	public void clear() {
+	public void cleanTestPathSet() {
 		testPathSet.clear();
 	}
 
@@ -103,7 +110,8 @@ public class TestPathController extends Observable {
 	public Set<Path<Integer>> getTestRequirementCoverage() {
 		Set<Path<Integer>> total = new TreeSet<Path<Integer>>();
 		for(Path<Integer> path : selectedTestPaths) {
-			for(Path<Integer> p : Activator.getDefault().getTestRequirementController().getTestPathCoverage(path))
+			Set<Path<Integer>> coveredPaths = Activator.getDefault().getTestRequirementController().getTestPathCoverage(path);
+			for(Path<Integer> p : coveredPaths)
 				if(!total.contains(p))
 					total.add(p);
 		}
@@ -149,5 +157,46 @@ public class TestPathController extends Observable {
 	public void unSelect() {
 		setChanged();
 		notifyObservers(new TestPathChangedEvent(getTestPaths(), getTestPathsManuallyAdded()));
+	}
+	
+	public Path<Integer> createTestPath(String input) {
+		Graph<Integer> sourceGraph = Activator.getDefault().getSourceGraphController().getSourceGraph();
+		boolean validPath = true;
+		List<String> insertedNodes = getInsertedNodes(input);
+		List<Node<Integer>> pathNodes = new LinkedList<Node<Integer>> ();
+		try {
+			List<Node<Integer>> fromToNodes = new ArrayList<Node<Integer>>(2);
+			fromToNodes.add(sourceGraph.getNode(Integer.parseInt(insertedNodes.get(0))));
+			int i = 1; 
+			while(i < insertedNodes.size() && validPath) {
+				fromToNodes.add(sourceGraph.getNode(Integer.parseInt(insertedNodes.get(i))));
+				if(fromToNodes.get(0) != null && fromToNodes.get(1) != null && 
+						sourceGraph.isPath(new Path<Integer>(fromToNodes))) {
+					pathNodes.add(fromToNodes.get(0));
+					fromToNodes.remove(0);
+				} else
+					validPath = false;
+				i++;
+			}
+			if (validPath) {
+				pathNodes.add(fromToNodes.get(0));
+
+				if(!sourceGraph.isInitialNode(pathNodes.get(0)) || !sourceGraph.isFinalNode(pathNodes.get(pathNodes.size() - 1)))
+					return null;
+
+				return new Path<Integer>(pathNodes);
+			}
+		} catch(NumberFormatException ee) {
+		}
+		return null;
+	}
+	
+	private List<String> getInsertedNodes(String input) {
+		List<String> aux = new LinkedList<String>();
+		StringTokenizer strtok = new StringTokenizer(input, ", ");
+		// separate the inserted nodes.
+		while(strtok.hasMoreTokens())
+			aux.add(strtok.nextToken());
+		return aux;
 	}
 }

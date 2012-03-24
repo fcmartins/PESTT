@@ -21,7 +21,7 @@ public class LinkHandler extends AbstractHandler {
 	    } else {
 			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 			MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
-		}
+	    }
 	    return null; 
 	}	
 }

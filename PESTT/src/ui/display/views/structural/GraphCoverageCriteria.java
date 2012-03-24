@@ -144,17 +144,9 @@ public class GraphCoverageCriteria implements Observer {
 					setSelected(null);
 					setSelected((GraphItem) e.item);
 					GraphCoverageCriteriaId option = (GraphCoverageCriteriaId) getSelected().getData();
-			//		if(Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria() != null)
-			//			Activator.getDefault().getEditorController().removeJavadocTagAnnotation(JavadocTagAnnotations.COVERAGE_CRITERIA, 
-			//				Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria().toString());
-			//		else 
-			//			Activator.getDefault().getEditorController().clearJavadocTagAnnotation();
 					Activator.getDefault().getTestRequirementController().selectCoverageCriteria(option);
-			//		Activator.getDefault().getEditorController().addJavadocTagAnnotation(JavadocTagAnnotations.COVERAGE_CRITERIA, option.toString());
 				} else
-					Activator.getDefault().getTestRequirementController().selectCoverageCriteria(null);
-			//		Activator.getDefault().getEditorController().clearJavadocTagAnnotation();
-				
+					Activator.getDefault().getTestRequirementController().selectCoverageCriteria(null);			
 			}
 		};	
 		graph.addSelectionListener(event);				

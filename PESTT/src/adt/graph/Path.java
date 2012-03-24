@@ -46,12 +46,16 @@ public class Path<V extends Comparable<V>> extends AbstractPath<V> {
 	
 	private boolean isConsecutive(int i, Path<V> path) {
 		Iterator<Node<V>> it = path.iterator();
-		while (i < nodes.size() && it.hasNext()) {
-			if (nodes.get(i) != it.next())
-				return false;
-			i++;
+		int size = path.nodes.size();
+		if(nodes.size() >= size) {
+			while(i < nodes.size() && it.hasNext()) {
+				if(nodes.get(i) != it.next())
+					return false;
+				i++;
+			}
+			return it.hasNext() ? false : true;	
 		}
-		return true;
+		return false;
 	}
 
 	
