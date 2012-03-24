@@ -163,9 +163,10 @@ public class Graph implements Observer {
 	
 	@Override
 	public void update(Observable obs, Object data) {
-		if(data instanceof CFGCreateEvent)
+		if(data instanceof CFGCreateEvent) {
 			create(((CFGCreateEvent) data).sourceGraph);
-		else if(data instanceof TestRequirementSelectedEvent) {
+			bringGraphToTop();
+		} else if(data instanceof TestRequirementSelectedEvent) {
 			if(((TestRequirementSelectedEvent) data).selectedTestRequirement == null) {
 				unselectAll();
 				Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
@@ -191,12 +192,16 @@ public class Graph implements Observer {
 		}
 	}
 
-	private void selectTestRequirement(TestRequirementSelectedEvent data) {
+	private void bringGraphToTop() {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(Description.VIEW_GRAPH);
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void selectTestRequirement(TestRequirementSelectedEvent data) {
+		bringGraphToTop();
 		List<GraphItem> aux = selectInGraph(data.selectedTestRequirement);
 		GraphItem[] items = Arrays.copyOf(aux.toArray(), aux.toArray().length, GraphItem[].class); // convert the aux into an array of GraphItems.
 		setSelected(items); // the list of selected items.
@@ -204,11 +209,7 @@ public class Graph implements Observer {
 	}
 	
 	private void selectTestPath(TestPathSelectedEvent data) {
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(Description.VIEW_GRAPH);
-		} catch(PartInitException e) {
-			e.printStackTrace();
-		}
+		bringGraphToTop();
 		List<GraphItem> aux = selectTestPathSet(data.selectedTestPaths);
 		GraphItem[] items = Arrays.copyOf(aux.toArray(), aux.toArray().length, GraphItem[].class); // convert the aux into an array of GraphItems.
 		setSelected(items); // the list of selected items.
