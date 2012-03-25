@@ -119,7 +119,6 @@ public class RefreshHandler extends AbstractHandler {
 			}
 			
 			Activator.getDefault().getTestRequirementController().generateTestRequirement();
-			
 		}
 		Activator.getDefault().getEditorController().setListenUpdates(true);
 	}

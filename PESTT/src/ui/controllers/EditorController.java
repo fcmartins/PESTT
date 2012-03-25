@@ -48,6 +48,10 @@ public class EditorController extends Observable {
 		editor.setListenUpdates(b);
 	}
 	
+	public boolean isDirty() {
+		return editor.isDirty();
+	}
+	
 	public void setGraphInformation(GraphInformation information) {
 		this.information = information;		
 	}

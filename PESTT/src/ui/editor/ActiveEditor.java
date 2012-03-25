@@ -85,7 +85,7 @@ public class ActiveEditor implements Observer {
 	public void setListenUpdates(boolean listenUpdates) {
 		this.listenUpdates = listenUpdates;
 	}
-
+	
 	public void deleteObservers() {
 		Activator.getDefault().getTestRequirementController().deleteObserver(this);
 		Activator.getDefault().getTestRequirementController().deleteObserverTestRequirement(this);
@@ -99,6 +99,10 @@ public class ActiveEditor implements Observer {
 
 	public void removeALLMarkers() {
 		marker.deleteAllMarkers();
+	}
+	
+	public boolean isDirty() {
+		return part.isDirty();
 	}
 
 	public String getProjectName() {
@@ -250,13 +254,13 @@ public class ActiveEditor implements Observer {
 	}
 
 	private void verifyChanges(MethodDeclaration method) {
-		byte[] currentHash = Activator.getDefault().getSourceGraphController().getMethodHash();
 		CompilationUnit unit = Activator.getDefault().getSourceGraphController().getCompilationUnit(compilationUnit);
 		unit.recordModifications();
 		MethodDeclaration temp = getMethodDeclaration(unit);
-		byte[] tempHash =  getMethodHash(temp);
+		byte[] currentHash = Activator.getDefault().getSourceGraphController().getMethodHash();
+		byte[] tempHash = getMethodHash(temp);
 		boolean result = Arrays.equals(currentHash, tempHash) ? true : false;
-		if(result) {
+		if(isDirty() && result) {
 			Activator.getDefault().getEditorController().removeALLMarkers();
 			SourceGraph source = new SourceGraph(); 
 			source.create(compilationUnit, getSelectedMethod());

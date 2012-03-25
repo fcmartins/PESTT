@@ -22,7 +22,6 @@ import org.eclipse.zest.core.widgets.GraphNode;
 import ui.constants.Colors;
 import ui.constants.Description;
 import ui.constants.MarkersType;
-import ui.editor.ActiveEditor;
 import ui.editor.Line;
 import domain.constants.Layer;
 import domain.coverage.instrument.ICoverageData;
@@ -58,8 +57,7 @@ public class GraphInformation {
 				break;
 			case GUARDS_FALSE:
 				addInformationToLayer2_3_4(FALSE);
-				break;
-			
+				break;		
 		}
 	}
 	
@@ -72,7 +70,7 @@ public class GraphInformation {
 						gconnection.setText(Description.EMPTY); // clear the visible information.
 						break;
 					}
-		new ActiveEditor().removeALLMarkers(); // removes the marks in the editor.
+		Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 	}
 
 	@SuppressWarnings("unchecked")
@@ -188,10 +186,11 @@ public class GraphInformation {
 			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				if(selection instanceof ITextSelection) {				
+				if(selection instanceof ITextSelection && !Activator.getDefault().getEditorController().isDirty()) {				
 					ITextSelection textSelected = (ITextSelection) selection; // get the text selected in the editor.
 					selectNode(textSelected.getOffset());
-				}
+				} else
+					Activator.getDefault().getEditorController().removeALLMarkers();
 			}
 		};
 		page.addSelectionListener(listener);
