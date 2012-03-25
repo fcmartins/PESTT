@@ -15,7 +15,7 @@ public class TestRequirementsHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		if(Activator.getDefault().getSourceGraphController().numberOfNodes() > 1)
+		if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1)
 			if(Activator.getDefault().getTestRequirementController().isCoverageCriteriaSelected()) {
 				Activator.getDefault().getEditorController().setListenUpdates(false);
 				Activator.getDefault().getTestRequirementController().generateTestRequirement();

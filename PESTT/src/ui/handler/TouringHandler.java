@@ -19,7 +19,7 @@ public class TouringHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		if(Activator.getDefault().getSourceGraphController().numberOfNodes() > 1) {
+		if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
 			option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
 			if(!option.equals(Description.NONE)) {
 				HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.

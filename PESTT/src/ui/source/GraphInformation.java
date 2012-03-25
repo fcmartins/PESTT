@@ -106,7 +106,9 @@ public class GraphInformation {
 						String info = (String) sourceGraph.getMetadata(edge); // get the information.
 						if(info != null) 
 							if(!value.equals(ALL)) {
-								if(value.equals(TRUE) && !info.substring(0,  1).equals("¬"))
+								if(info.equals("break;") || info.equals("continue;") || info.equals("return;"))
+									gconnection.setText(info);
+								else if(value.equals(TRUE) && !info.substring(0,  1).equals("¬"))
 									gconnection.setText(info); // set the information to the edge.
 								else if(value.equals(FALSE) && info.substring(0,  1).equals("¬"))
 									gconnection.setText(info); // set the information to the edge.

@@ -15,7 +15,7 @@ public class LinkHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-	    if(Activator.getDefault().getSourceGraphController().numberOfNodes() > 1) {
+	    if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
 	    	boolean state = HandlerUtil.toggleCommandState(event.getCommand());
 	    	Activator.getDefault().getCFGController().settLinkState(!state);
 	    } else {
