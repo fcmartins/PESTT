@@ -12,8 +12,12 @@ public class CoverageDataController extends Observable {
 
 	private CoverageDataSet coverageDataMap;
 	
-	public void addObserver() {
+	public void addObserverToCoverageData() {
 		coverageDataMap.addObserver();
+	}
+	
+	public void deleteObserverToCoverageData() {
+		coverageDataMap.deleteObserver();
 	}
 	
 	public CoverageDataController(CoverageDataSet coverageDataMap) {

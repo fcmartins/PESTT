@@ -26,6 +26,10 @@ public class CoverageDataSet implements Observer {
 	public void addObserver() {
 		Activator.getDefault().getSourceGraphController().addObserverSourceGraph(this);
 	}
+	
+	public void deleteObserver() {
+		Activator.getDefault().getSourceGraphController().deleteObserverSourceGraph(this);
+	}
 
 	public void put(Path<Integer> path, List<ICoverageData> data) {
 		coverageDataMap.put(path, data);

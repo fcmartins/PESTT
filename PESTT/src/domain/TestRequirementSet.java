@@ -65,6 +65,12 @@ public class TestRequirementSet extends Observable {
 		notifyObservers(new TestRequirementChangedEvent(getTestRequirements(), getInfeasiblesTestRequirements(), getTestRequirementsManuallyAdded(), hasInfinitePath()));
 	}
 	
+	public void clearTestRequirementsManuallyAdded() {
+		manuallyTestRequirementSet.clear();
+		setChanged();
+		notifyObservers(new TestRequirementChangedEvent(getTestRequirements(), getInfeasiblesTestRequirements(), getTestRequirementsManuallyAdded(), hasInfinitePath()));
+	}
+	
 	public boolean isInfeasible(AbstractPath<Integer> selectedTestRequirement) {
 		return infeasibleSet.contains(selectedTestRequirement);
 	}

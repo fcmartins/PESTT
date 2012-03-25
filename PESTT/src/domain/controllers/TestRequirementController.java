@@ -74,6 +74,14 @@ public class TestRequirementController extends Observable {
 		return testRequirementSet.sizeInfeasibles();
 	}
 	
+	public void clearInfeasibles() {
+		testRequirementSet.clearInfeasibles();
+	}
+	
+	public void clearTestRequirementsManuallyAdded() {
+		testRequirementSet.clearTestRequirementsManuallyAdded();
+	}
+	
 	public Iterable<AbstractPath<Integer>> getInfeasiblesTestRequirements() {
 		return testRequirementSet.getInfeasiblesTestRequirements();
 	}

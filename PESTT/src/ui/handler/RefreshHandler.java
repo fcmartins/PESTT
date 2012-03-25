@@ -71,15 +71,18 @@ public class RefreshHandler extends AbstractHandler {
 	
 	private void resetDataStructures(IWorkbenchWindow window) {
 		Activator.getDefault().getEditorController().setListenUpdates(false);
+		Activator.getDefault().getCoverageDataController().deleteObserverToCoverageData();
+		Activator.getDefault().getTestPathController().cleanTestPathSet();
+		Activator.getDefault().getTestPathController().cleanTestPathManuallyAdded();
+		Activator.getDefault().getTestRequirementController().cleanTestRequirementSet();
+		Activator.getDefault().getTestRequirementController().clearInfeasibles();
+		Activator.getDefault().getTestRequirementController().clearTestRequirementsManuallyAdded();
+		Activator.getDefault().getCoverageDataController().clearCoverageDataSet();
+		Activator.getDefault().getStatisticsController().cleanStatisticsSet();
 		String selectedMethod = Activator.getDefault().getEditorController().getSelectedMethod();
 		ICompilationUnit unit = Activator.getDefault().getEditorController().getCompilationUnit();
 		Activator.getDefault().getSourceGraphController().create(unit, selectedMethod);
-		Activator.getDefault().getTestPathController().cleanTestPathSet();
-		Activator.getDefault().getCoverageDataController().clearCoverageDataSet();
-		Activator.getDefault().getCoverageDataController().addObserver();
-		Activator.getDefault().getTestRequirementController().cleanTestRequirementSet();
-		Activator.getDefault().getStatisticsController().cleanStatisticsSet();
-		
+		Activator.getDefault().getCoverageDataController().addObserverToCoverageData();
 		Map<JavadocTagAnnotations, List<String>> javadocAnnotations = Activator.getDefault().getSourceGraphController().getJavadocAnnotations();
 		List<String> criteria = javadocAnnotations.get(JavadocTagAnnotations.COVERAGE_CRITERIA);
 		if(criteria != null && !criteria.isEmpty()) {

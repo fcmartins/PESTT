@@ -47,7 +47,6 @@ public class TestPathController extends Observable {
 		testPathSet.deleteObserver(o);
 	}
 
-	
 	public void addTestPath(Path<Integer> newTestPath) {
 		testPathSet.add(newTestPath);
 		List<ICoverageData> newData = new LinkedList<ICoverageData>();
@@ -65,6 +64,10 @@ public class TestPathController extends Observable {
 	
 	public void cleanTestPathSet() {
 		testPathSet.clear();
+	}
+	
+	public void cleanTestPathManuallyAdded() {
+		testPathSet.cleanTestPathManuallyAdded();
 	}
 
 	public boolean isTestPathSelected() {

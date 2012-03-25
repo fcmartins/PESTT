@@ -500,8 +500,7 @@
             locationURI="menu:PESTT.Layers?after=additions">
          <menu
                id="PESTT.LayersMenu"
-               label="Layers Menu"
-               sibling_order="&lt;menu&#x0A;                  label=&quot;label&quot;&gt;&#x0A;            &lt;/menu&gt;">
+               label="Layers Menu">
             <command
                   commandId="PESTT.Layers"
                   label="Empty"
