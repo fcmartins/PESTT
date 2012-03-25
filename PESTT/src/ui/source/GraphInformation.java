@@ -29,6 +29,10 @@ import domain.coverage.instrument.ICoverageData;
 
 public class GraphInformation {
 
+	private static final String ALL = "All";
+	private static final String TRUE = "True";
+	private static final String FALSE = "False";
+	
 	private adt.graph.Graph<Integer> sourceGraph;
 	private ui.source.Graph layoutGraph;
 	private ISelectionListener listener;
@@ -40,15 +44,22 @@ public class GraphInformation {
 	public void setLayerInformation(Layer layer) {
 		sourceGraph = Activator.getDefault().getSourceGraphController().getSourceGraph(); // set the sourceGraph.
 		switch(layer) {
+		case INSTRUCTIONS:
+			addInformationToLayer1();
+			break;
 			case EMPTY:
 				clear();
 				break;
 			case GUARDS:
-				addInformationToLayer1();
+				addInformationToLayer2_3_4(ALL);
 				break;
-			case INSTRUCTIONS:
-				addInformationToLayer2();
+			case GUARDS_TRUE:
+				addInformationToLayer2_3_4(TRUE);
 				break;
+			case GUARDS_FALSE:
+				addInformationToLayer2_3_4(FALSE);
+				break;
+			
 		}
 	}
 	
@@ -63,23 +74,9 @@ public class GraphInformation {
 					}
 		new ActiveEditor().removeALLMarkers(); // removes the marks in the editor.
 	}
-	
-	private void addInformationToLayer1() {
-		setLayerInformation(Layer.EMPTY); // clean previous informations.
-		for(adt.graph.Node<Integer> node : sourceGraph.getNodes())  // search in the sourceGraph for all node.
-			for(adt.graph.Edge<Integer> edge : sourceGraph.getNodeEdges(node))   // search in the sourceGraph for all edges.
-				for(GraphConnection gconnection : layoutGraph.getGraphEdges())  // search in the layoutGraph for all edges.
-					if(gconnection.getData().equals(edge)) { // when they match.
-						sourceGraph.selectMetadataLayer(Layer.GUARDS.getLayer()); // change to the layer with the cycles information.
-						String info = (String) sourceGraph.getMetadata(edge); // get the information.
-						if(info != null)  // if it have information
-							gconnection.setText(info); // set the information to the edge.
-						break;
-					}
-	}
 
 	@SuppressWarnings("unchecked")
-	private void addInformationToLayer2() {
+	private void addInformationToLayer1() {
 		if(!layoutGraph.getSelected().isEmpty()) { // verify if there are nodes selected.
 			Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 			for(GraphItem item : layoutGraph.getSelected()) // through all graph items.
@@ -97,6 +94,26 @@ public class GraphInformation {
 				}
 		} else 
 			Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
+	}
+	
+	private void addInformationToLayer2_3_4(String value) {
+		setLayerInformation(Layer.EMPTY); // clean previous informations.
+		for(adt.graph.Node<Integer> node : sourceGraph.getNodes())  // search in the sourceGraph for all node.
+			for(adt.graph.Edge<Integer> edge : sourceGraph.getNodeEdges(node))   // search in the sourceGraph for all edges.
+				for(GraphConnection gconnection : layoutGraph.getGraphEdges())  // search in the layoutGraph for all edges.
+					if(gconnection.getData().equals(edge)) { // when they match.
+						sourceGraph.selectMetadataLayer(Layer.GUARDS.getLayer()); // change to the layer with the cycles information.
+						String info = (String) sourceGraph.getMetadata(edge); // get the information.
+						if(info != null) 
+							if(!value.equals(ALL)) {
+								if(value.equals(TRUE) && !info.substring(0,  1).equals("¬"))
+									gconnection.setText(info); // set the information to the edge.
+								else if(value.equals(FALSE) && info.substring(0,  1).equals("¬"))
+									gconnection.setText(info); // set the information to the edge.
+							} else
+								gconnection.setText(info); // set the information to the edge.
+						break;
+					}
 	}
 	
 	private List<ASTNode> getASTNodes(HashMap<ASTNode, Line> map) {

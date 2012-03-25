@@ -262,12 +262,8 @@ public class ActiveEditor implements Observer {
 			source.create(compilationUnit, getSelectedMethod());
 			Activator.getDefault().getSourceGraphController().updateMetadataInformation(source.getSourceGraph());
 		} else {
-			try {
-				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
 		}
 	}
 	

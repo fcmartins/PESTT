@@ -500,7 +500,8 @@
             locationURI="menu:PESTT.Layers?after=additions">
          <menu
                id="PESTT.LayersMenu"
-               label="Layers Menu">
+               label="Layers Menu"
+               sibling_order="&lt;menu&#x0A;                  label=&quot;label&quot;&gt;&#x0A;            &lt;/menu&gt;">
             <command
                   commandId="PESTT.Layers"
                   label="Empty"
@@ -512,13 +513,34 @@
             </command>
             <command
                   commandId="PESTT.Layers"
-                  label="Guards"
+                  label="Guards (All)"
                   style="radio">
                <parameter
                      name="org.eclipse.ui.commands.radioStateParameter"
-                     value="1">
+                     value="2">
                </parameter>
             </command>
+            <menu
+                  label="Guards (Custom)">
+               <command
+                     commandId="PESTT.Layers"
+                     label="True branches"
+                     style="radio">
+                  <parameter
+                        name="org.eclipse.ui.commands.radioStateParameter"
+                        value="3">
+                  </parameter>
+               </command>
+               <command
+                     commandId="PESTT.Layers"
+                     label="False branches"
+                     style="radio">
+                  <parameter
+                        name="org.eclipse.ui.commands.radioStateParameter"
+                        value="4">
+                  </parameter>
+               </command>
+            </menu>
          </menu>
       </menuContribution>
       <menuContribution
