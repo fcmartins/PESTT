@@ -36,7 +36,7 @@ public class CFGController extends Observable{
 				layer = Layer.GUARDS_FALSE;
 				break;
 			default:
-				layer = Layer.EMPTY;;
+				layer = Layer.EMPTY;
 		}
 		setChanged();
 		notifyObservers(new LayerChangeEvent(layer));

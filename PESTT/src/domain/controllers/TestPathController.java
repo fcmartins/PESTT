@@ -89,12 +89,14 @@ public class TestPathController extends Observable {
 	}
 
 	public void selectTourType(String selected) {
-		if(selected.equals(TourType.DETOUR))
+		if(selected.equals(TourType.DETOUR.toString()))
 			this.selectedTourType = TourType.DETOUR;
-		else if(selected.equals(TourType.SIDETRIP))
+		else if(selected.equals(TourType.SIDETRIP.toString()))
 			this.selectedTourType = TourType.SIDETRIP;
 		else 
 			this.selectedTourType = TourType.TOUR;
+		setChanged();
+		notifyObservers(new TestPathSelectedEvent(selectedTestPaths));
 	}
 	
 	public Iterable<Path<Integer>> getTestPathsManuallyAdded() {
