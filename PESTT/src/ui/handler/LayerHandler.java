@@ -24,12 +24,12 @@ public class LayerHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
 			option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
-			if(!option.equals(old)) {
-				if(option != null && !option.equals(Description.NONE)) {
-					HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
-					old = option;
-				}
-				Activator.getDefault().getCFGController().selectLayer(old);}
+			if(option != null && !option.equals(Description.NONE)) {
+				HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
+				old = option;
+			}
+			Activator.getDefault().getCFGController().selectLayer(old);
+			
 		} else {
 			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 			MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
