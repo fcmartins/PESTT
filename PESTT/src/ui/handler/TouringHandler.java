@@ -17,24 +17,27 @@ import ui.constants.Messages;
 
 public class TouringHandler extends AbstractHandler {
 
-	String option = Description.EMPTY;
-	String old = TourType.TOUR.toString(); 
+	private String option = Description.EMPTY;
+	private String old = TourType.TOUR.toString(); 
+	private boolean flag = false;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
-			option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
-			if(!option.equals(old)) {
-				if(option != null && !option.equals(Description.NONE)) {
-					HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
-					old = option;
+		if(!flag)
+			if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
+				option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
+				if(!option.equals(old)) {
+					if(option != null && !option.equals(Description.NONE)) {
+						HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
+						old = option;
+					}
+					Activator.getDefault().getTestPathController().selectTourType(old);
 				}
-				Activator.getDefault().getTestPathController().selectTourType(old);
+			} else {
+				flag = true;
+				IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
 			}
-		} else {
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-			MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
-		}
 		return null;
 	}
 }

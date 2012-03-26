@@ -17,23 +17,26 @@ import ui.constants.Messages;
 
 public class LayerHandler extends AbstractHandler {
 
-	String option = Description.EMPTY;
-	String old = Layer.EMPTY.toString(); 
+	private String option = Description.EMPTY;
+	private String old = Layer.EMPTY.toString(); 
+	private boolean flag = false;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
-			option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
-			if(option != null && !option.equals(Description.NONE)) {
-				HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
-				old = option;
+		if(!flag)
+			if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
+				option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
+				if(option != null && !option.equals(Description.NONE)) {
+					HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
+					old = option;
+				}
+				Activator.getDefault().getCFGController().selectLayer(old);
+				
+			} else {
+				flag = true;
+				IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
 			}
-			Activator.getDefault().getCFGController().selectLayer(old);
-			
-		} else {
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-			MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
-		}
 		return null;
 	}
 }

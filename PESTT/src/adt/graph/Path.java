@@ -71,17 +71,22 @@ public class Path<V extends Comparable<V>> extends AbstractPath<V> {
 
 	private boolean isConsecutiveSideTrip(int i, Path<V> path) {
 		Iterator<Node<V>> it = path.iterator();
+		Node<V> currentNode = null;
 		while(i < nodes.size() && it.hasNext()) {
 			Node<V> node = it.next();
-			if(nodes.get(i) != node) {
+			if(nodes.get(i) != node) { 
 				// try advance loop
-				Node<V> currentNode = nodes.get(i);
+				
 				while(i < nodes.size() && nodes.get(i) != currentNode)
 					i++;
-				i++;				
-				 if((i < nodes.size() && nodes.get(i) != currentNode) || i == nodes.size())
+				
+				if(i < nodes.size() && nodes.get(i) == node)
+					return true;
+				
+				if((i < nodes.size() && nodes.get(i) != currentNode) || i >= nodes.size())
 					return false;
 			}
+			currentNode = nodes.get(i);
 			i++;
 		}
 		return true;

@@ -78,7 +78,7 @@ public class StatementsVisitor extends ASTVisitor {
 		Node<Integer> initial = new Node<Integer>(nodeNum); // the initial node.
 		sourceGraph.addInitialNode(initial); // add first node to the graph.
 		prevNode.push(initial); // add first node to the previous node stack.
-		finalnode = null; // The final node.
+		finalnode = initial; // The final node.
 		infos = new GraphInformation(); // the graph informations.
 	}
 
@@ -480,8 +480,7 @@ public class StatementsVisitor extends ASTVisitor {
 	}
 
 	public Graph<Integer> getGraph() {
-		if(finalnode != null) // if exist final node.
-			sourceGraph.addFinalNode(finalnode); // add final node to the final nodes of the graph.
+		sourceGraph.addFinalNode(finalnode); // add final node to the final nodes of the graph.
 		return sourceGraph;
 	}
 }
