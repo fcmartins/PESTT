@@ -28,6 +28,7 @@ import domain.coverage.instrument.CoverageData;
 import domain.coverage.instrument.ICoverageData;
 import domain.events.TestPathChangedEvent;
 import domain.events.TestPathSelectedEvent;
+import domain.events.TestPathSelectedTourEvent;
 
 public class TestPathController extends Observable {
 
@@ -96,7 +97,7 @@ public class TestPathController extends Observable {
 		else 
 			this.selectedTourType = TourType.TOUR;
 		setChanged();
-		notifyObservers(new TestPathSelectedEvent(selectedTestPaths));
+		notifyObservers(new TestPathSelectedTourEvent(selectedTourType));
 	}
 	
 	public Iterable<Path<Integer>> getTestPathsManuallyAdded() {

@@ -10,9 +10,10 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import ui.constants.JavadocTagAnnotations;
+
 import adt.graph.Graph;
 import adt.graph.Node;
-import domain.constants.JavadocTagAnnotations;
 import domain.constants.Layer;
 import domain.events.CFGCreateEvent;
 import domain.events.CFGUpdateEvent;

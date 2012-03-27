@@ -21,6 +21,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.handlers.IHandlerService;
 
 import ui.constants.Description;
+import ui.constants.JavadocTagAnnotations;
 import ui.constants.Messages;
 import ui.constants.Preferences;
 import ui.display.views.ViewGraph;
@@ -29,7 +30,6 @@ import ui.display.views.ViewStructuralCriteria;
 import ui.editor.ActiveEditor;
 import adt.graph.Path;
 import domain.constants.GraphCoverageCriteriaId;
-import domain.constants.JavadocTagAnnotations;
 import domain.constants.Layer;
 import domain.coverage.instrument.CoverageData;
 import domain.coverage.instrument.ICoverageData;
@@ -87,6 +87,9 @@ public class RefreshHandler extends AbstractHandler {
 		List<String> criteria = javadocAnnotations.get(JavadocTagAnnotations.COVERAGE_CRITERIA);
 		if(criteria != null && !criteria.isEmpty()) {
 			Activator.getDefault().getTestRequirementController().selectCoverageCriteria(GraphCoverageCriteriaId.valueOf(criteria.get(0)));
+			List<String> tour = javadocAnnotations.get(JavadocTagAnnotations.TOUR_TYPE);
+			if(!tour.isEmpty())
+				Activator.getDefault().getTestPathController().selectTourType(tour.get(0));
 			for(String input : javadocAnnotations.get(JavadocTagAnnotations.ADDITIONAL_TEST_REQUIREMENT_PATH)) {
 				String msg = input;
 				input = input.substring(1, input.length() - 1);
@@ -135,10 +138,8 @@ public class RefreshHandler extends AbstractHandler {
 				stateLink.setValue(false); // disable selection
 				handlerService.executeCommand(Description.LINK_BUTTON, null); // update the value.
 			}
-			if(!valueLayer.equals(Integer.toString(Layer.EMPTY.getLayer())) && !valueLayer.equals(Description.NONE)) {
-				handlerService.executeCommand(Description.LAYER_BUTTON, null); // update the value.//
-			}
-				
+			if(!valueLayer.equals(Integer.toString(Layer.EMPTY.getLayer())) && !valueLayer.equals(Description.NONE))
+				handlerService.executeCommand(Description.LAYER_BUTTON, null); // update the value.
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

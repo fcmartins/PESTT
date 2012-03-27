@@ -35,11 +35,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import ui.constants.Description;
+import ui.constants.JavadocTagAnnotations;
 import adt.graph.Edge;
 import adt.graph.Graph;
 import adt.graph.Node;
 import domain.GraphInformation;
-import domain.constants.JavadocTagAnnotations;
 import domain.constants.Layer;
 import domain.graph.visitors.RenumNodesGraphVisitor;
 
@@ -89,6 +89,7 @@ public class StatementsVisitor extends ASTVisitor {
 			hash = getMethodHash(node);
 			if(node.getJavadoc() != null) {
 				javadocAnnotations.put(JavadocTagAnnotations.COVERAGE_CRITERIA, getProperty(node.getJavadoc(), JavadocTagAnnotations.COVERAGE_CRITERIA.getTag()));
+				javadocAnnotations.put(JavadocTagAnnotations.TOUR_TYPE, getProperty(node.getJavadoc(), JavadocTagAnnotations.TOUR_TYPE.getTag()));				
 				javadocAnnotations.put(JavadocTagAnnotations.INFEASIBLE_PATH, getProperty(node.getJavadoc(), JavadocTagAnnotations.INFEASIBLE_PATH.getTag()));
 				javadocAnnotations.put(JavadocTagAnnotations.ADDITIONAL_TEST_REQUIREMENT_PATH, getProperty(node.getJavadoc(), JavadocTagAnnotations.ADDITIONAL_TEST_REQUIREMENT_PATH.getTag()));
 				javadocAnnotations.put(JavadocTagAnnotations.ADDITIONAL_TEST_PATH, getProperty(node.getJavadoc(), JavadocTagAnnotations.ADDITIONAL_TEST_PATH.getTag()));

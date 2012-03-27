@@ -41,12 +41,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import ui.constants.Description;
+import ui.constants.JavadocTagAnnotations;
 import ui.constants.Messages;
 import adt.graph.AbstractPath;
 import adt.graph.Path;
 import domain.SourceGraph;
-import domain.constants.JavadocTagAnnotations;
 import domain.events.TestPathChangedEvent;
+import domain.events.TestPathSelectedTourEvent;
 import domain.events.TestRequirementChangedEvent;
 import domain.events.TestRequirementSelectedCriteriaEvent;
 
@@ -65,6 +66,7 @@ public class ActiveEditor implements Observer {
 		Activator.getDefault().getTestRequirementController().addObserver(this);
 		Activator.getDefault().getTestRequirementController().addObserverTestRequirement(this);
 		Activator.getDefault().getTestPathController().addObserverTestPath(this);
+		Activator.getDefault().getTestPathController().addObserver(this);
 		part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		ITextEditor editor = (ITextEditor) part; // obtain the text editor.
 		ISelection select = editor.getSelectionProvider().getSelection(); // the selected text.
@@ -89,7 +91,8 @@ public class ActiveEditor implements Observer {
 	public void deleteObservers() {
 		Activator.getDefault().getTestRequirementController().deleteObserver(this);
 		Activator.getDefault().getTestRequirementController().deleteObserverTestRequirement(this);
-		Activator.getDefault().getTestPathController().deleteObserverTestPath(this);		
+		Activator.getDefault().getTestPathController().deleteObserverTestPath(this);
+		Activator.getDefault().getTestPathController().deleteObserver(this);
 	}
 	
 	public void createMarker(String markerType, int offset, int length) {
@@ -194,32 +197,25 @@ public class ActiveEditor implements Observer {
 			unit.recordModifications();
 			MethodDeclaration method = getMethodDeclaration(unit);
 			if(method != null && Activator.getDefault().getTestRequirementController().isCoverageCriteriaSelected()) 
-				if(data instanceof TestRequirementSelectedCriteriaEvent) {
-					String criteria = ((TestRequirementSelectedCriteriaEvent) data).selectedCoverageCriteria.toString();
-					Iterable<AbstractPath<Integer>> infeasibles = Activator.getDefault().getTestRequirementController().getInfeasiblesTestRequirements();
-					Iterable<Path<Integer>> manuallyAdded = Activator.getDefault().getTestRequirementController().getTestRequirementsManuallyAdded();
-					Iterable<Path<Integer>> testPath = Activator.getDefault().getTestPathController().getTestPathsManuallyAdded();
-					setJavadocAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);
-				} else if(data instanceof TestRequirementChangedEvent) {
-					String criteria = Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria().toString();
-					Iterable<AbstractPath<Integer>> infeasibles = ((TestRequirementChangedEvent) data).infeasigles;
-					Iterable<Path<Integer>> manuallyAdded = ((TestRequirementChangedEvent) data).manuallyAdded;
-					Iterable<Path<Integer>> testPath = Activator.getDefault().getTestPathController().getTestPathsManuallyAdded();
-					setJavadocAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);	
-				} else if(data instanceof TestPathChangedEvent) {
-					String criteria = Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria().toString();
-					Iterable<AbstractPath<Integer>> infeasibles = Activator.getDefault().getTestRequirementController().getInfeasiblesTestRequirements();
-					Iterable<Path<Integer>> manuallyAdded = Activator.getDefault().getTestRequirementController().getTestRequirementsManuallyAdded();
-					Iterable<Path<Integer>> testPath =((TestPathChangedEvent) data).manuallyAdded;
-					setJavadocAnnotation(unit, method, criteria, infeasibles, manuallyAdded, testPath);		
+				if(data instanceof TestRequirementSelectedCriteriaEvent  ||
+				   data instanceof TestPathSelectedTourEvent ||
+				   data instanceof TestRequirementChangedEvent ||
+				   data instanceof TestPathChangedEvent) {
+						String criteria = Activator.getDefault().getTestRequirementController().getSelectedCoverageCriteria().toString();
+						String tour = Activator.getDefault().getTestPathController().getSelectedTourType().toString();
+						Iterable<AbstractPath<Integer>> infeasibles = Activator.getDefault().getTestRequirementController().getInfeasiblesTestRequirements();
+						Iterable<Path<Integer>> manuallyAdded = Activator.getDefault().getTestRequirementController().getTestRequirementsManuallyAdded();
+						Iterable<Path<Integer>> testPath = Activator.getDefault().getTestPathController().getTestPathsManuallyAdded();
+						setJavadocAnnotation(unit, method, criteria, tour, infeasibles, manuallyAdded, testPath);		
 				}
 		}
 	}
 	
-	private void setJavadocAnnotation(CompilationUnit unit, MethodDeclaration method, String criteria, Iterable<AbstractPath<Integer>> infeasibles, Iterable<Path<Integer>> testRequireents, Iterable<Path<Integer>> testPath) {	
+	private void setJavadocAnnotation(CompilationUnit unit, MethodDeclaration method, String criteria, String tour, Iterable<AbstractPath<Integer>> infeasibles, Iterable<Path<Integer>> testRequireents, Iterable<Path<Integer>> testPath) {	
 		Javadoc javadoc = method.getAST().newJavadoc();
 		method.setJavadoc(javadoc);
 		createTag(method, JavadocTagAnnotations.COVERAGE_CRITERIA, criteria, javadoc);
+		createTag(method, JavadocTagAnnotations.TOUR_TYPE, tour, javadoc);
 		for(AbstractPath<Integer> path : infeasibles)
 			createTag(method, JavadocTagAnnotations.INFEASIBLE_PATH, path.toString(), javadoc);
 		for(Path<Integer> path : testRequireents)

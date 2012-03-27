@@ -10,6 +10,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.handlers.RadioState;
 
+import domain.constants.Layer;
 import domain.constants.TourType;
 
 import ui.constants.Description;
@@ -26,18 +27,19 @@ public class TouringHandler extends AbstractHandler {
 		if(!flag)
 			if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
 				option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
-				if(!option.equals(old)) {
-					if(option != null && !option.equals(Description.NONE)) {
-						HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
-						old = option;
-					}
-					Activator.getDefault().getTestPathController().selectTourType(old);
-				}
+				if(option != null && !option.equals(Description.NONE)) {
+					HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
+					old = option;
+				} else if(option == null && old.equals(Layer.EMPTY.toString()))
+					old = (String) event.getCommand().getState("org.eclipse.ui.commands.radioState").getValue();
+				Activator.getDefault().getTestPathController().selectTourType(old);
 			} else {
 				flag = true;
 				IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
 			}
+		else if(flag)
+			flag = false;
 		return null;
 	}
 }

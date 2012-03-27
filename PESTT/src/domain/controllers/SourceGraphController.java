@@ -7,9 +7,10 @@ import java.util.Observer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import ui.constants.JavadocTagAnnotations;
+
 import adt.graph.Graph;
 import domain.SourceGraph;
-import domain.constants.JavadocTagAnnotations;
 import domain.graph.visitors.IGraphVisitor;
 
 public class SourceGraphController {
