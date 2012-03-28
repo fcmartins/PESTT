@@ -30,7 +30,9 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -54,12 +56,15 @@ import domain.events.TestRequirementSelectedCriteriaEvent;
 public class ActiveEditor implements Observer {
 
 	private IEditorPart part;
-	private ITextSelection textSelect; // text selected in editor.
+	private ITextEditor editor;
+	private ITextSelection textSelected; // text selected in editor.
 	private IFile file; // the current open file.
 	private Markers marker; // marker to add.
 	private ICompilationUnit compilationUnit;
 	private IJavaProject javaProject;
 	private boolean listenUpdates;
+	private boolean updated;
+	private IDocumentListener listener;
 
 	public ActiveEditor() {
 		listenUpdates = true;
@@ -68,9 +73,10 @@ public class ActiveEditor implements Observer {
 		Activator.getDefault().getTestPathController().addObserverTestPath(this);
 		Activator.getDefault().getTestPathController().addObserver(this);
 		part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-		ITextEditor editor = (ITextEditor) part; // obtain the text editor.
+		editor = (ITextEditor) part; // obtain the text editor.
+		addChangeListener();
 		ISelection select = editor.getSelectionProvider().getSelection(); // the selected text.
-		textSelect = (ITextSelection) select; // get the text selected.
+		textSelected = (ITextSelection) select; // get the text selected.
 		file = (IFile) part.getEditorInput().getAdapter(IFile.class); // get the file
 		marker = new Markers(file);
 		IProject project = file.getProject();
@@ -93,6 +99,28 @@ public class ActiveEditor implements Observer {
 		Activator.getDefault().getTestRequirementController().deleteObserverTestRequirement(this);
 		Activator.getDefault().getTestPathController().deleteObserverTestPath(this);
 		Activator.getDefault().getTestPathController().deleteObserver(this);
+		deleteChangeListener();
+	}
+	
+	private void addChangeListener() {
+		listener = new IDocumentListener() {
+
+			@Override
+			public void documentAboutToBeChanged(DocumentEvent event) {
+				// do nothing
+			}
+
+			@Override
+			public void documentChanged(DocumentEvent event) {
+				removeALLMarkers();
+				updated = false;
+			}
+		};
+		editor.getDocumentProvider().getDocument(editor.getEditorInput()).addPrenotifiedDocumentListener(listener);
+	}
+	
+	private void deleteChangeListener() {
+		editor.getDocumentProvider().getDocument(editor.getEditorInput()).removePrenotifiedDocumentListener(listener);
 	}
 	
 	public void createMarker(String markerType, int offset, int length) {
@@ -104,8 +132,12 @@ public class ActiveEditor implements Observer {
 		marker.deleteAllMarkers();
 	}
 	
-	public boolean isDirty() {
-		return part.isDirty();
+	public boolean isEverythingMatching() {
+		return updated;
+	}
+	
+	public void everythingMatch() {
+		this.updated = true;;
 	}
 
 	public String getProjectName() {
@@ -147,7 +179,7 @@ public class ActiveEditor implements Observer {
 		try {
 			for(IType type : compilationUnit.getAllTypes())
 				for(IMethod method : type.getMethods()) {
-					int cursorPosition = textSelect.getOffset();
+					int cursorPosition = textSelected.getOffset();
 					int methodStart = method.getSourceRange().getOffset();
 					int methodEnd = method.getSourceRange().getOffset() + method.getSourceRange().getLength();
 					if(methodStart <= cursorPosition && cursorPosition <= methodEnd)
@@ -160,9 +192,7 @@ public class ActiveEditor implements Observer {
 	}
 
 	public boolean isInMethod() {
-		if(getSelectedMethod() != null)
-			return true;
-		return false;
+		return getSelectedMethod() != null ? true : false;
 	}
 
 	public String getClassName() {
@@ -170,10 +200,7 @@ public class ActiveEditor implements Observer {
 	}
 
 	public String getLocation() {
-		if(!getPackageName().equals(Description.EMPTY))
-			return getPackageName() + "." + getClassName();
-		else
-			return getClassName();
+		return !getPackageName().equals(Description.EMPTY) ? getPackageName() + "." + getClassName() : getClassName();
 	}
 
 	public String getClassFilePath() {
@@ -212,6 +239,7 @@ public class ActiveEditor implements Observer {
 	}
 	
 	private void setJavadocAnnotation(CompilationUnit unit, MethodDeclaration method, String criteria, String tour, Iterable<AbstractPath<Integer>> infeasibles, Iterable<Path<Integer>> testRequireents, Iterable<Path<Integer>> testPath) {	
+		boolean temp = updated;
 		Javadoc javadoc = method.getAST().newJavadoc();
 		method.setJavadoc(javadoc);
 		createTag(method, JavadocTagAnnotations.COVERAGE_CRITERIA, criteria, javadoc);
@@ -221,8 +249,9 @@ public class ActiveEditor implements Observer {
 		for(Path<Integer> path : testRequireents)
 			createTag(method, JavadocTagAnnotations.ADDITIONAL_TEST_REQUIREMENT_PATH, path.toString(), javadoc);
 		for(Path<Integer> path : testPath)
-			createTag(method, JavadocTagAnnotations.ADDITIONAL_TEST_PATH, path.toString(), javadoc);
+			createTag(method, JavadocTagAnnotations.ADDITIONAL_TEST_PATH, path.toString(), javadoc); 
 		applychanges(unit);
+		updated = temp;
 		verifyChanges(method);
 	}
 
@@ -256,7 +285,7 @@ public class ActiveEditor implements Observer {
 		byte[] currentHash = Activator.getDefault().getSourceGraphController().getMethodHash();
 		byte[] tempHash = getMethodHash(temp);
 		boolean result = Arrays.equals(currentHash, tempHash) ? true : false;
-		if(isDirty() && result) {
+		if(isEverythingMatching() && result) {
 			Activator.getDefault().getEditorController().removeALLMarkers();
 			SourceGraph source = new SourceGraph(); 
 			source.create(compilationUnit, getSelectedMethod());
@@ -264,6 +293,7 @@ public class ActiveEditor implements Observer {
 		} else {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
+			updated = true;
 		}
 	}
 	

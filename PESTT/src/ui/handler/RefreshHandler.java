@@ -135,6 +135,7 @@ public class RefreshHandler extends AbstractHandler {
 		String valueLayer = stateLayer.getValue().toString(); // the value of the layer.
 		try {
 			if(valueLink) {
+				Activator.getDefault().getCFGController().settLinkState(false);
 				stateLink.setValue(false); // disable selection
 				handlerService.executeCommand(Description.LINK_BUTTON, null); // update the value.
 			}

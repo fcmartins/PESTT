@@ -71,12 +71,15 @@ public class TestRequirementsViewer extends AbstractTableViewer implements ITabl
 			cleanPathStatus();
 			setInfeasibles(((TestRequirementChangedEvent) data).infeasigles);
 		} else if(data instanceof TestPathSelectedEvent || data instanceof TestPathSelectedTourEvent) {
-			Set<Path<Integer>> selectedTestPaths = Activator.getDefault().getTestPathController().getSelectedTestPaths();
-			if(selectedTestPaths != null)
-				if(!selectedTestPaths.isEmpty())
-					setPathStatus();
-				else
-					cleanPathStatus();
+			if(Activator.getDefault().getEditorController().isEverythingMatching()) {
+				Set<Path<Integer>> selectedTestPaths = Activator.getDefault().getTestPathController().getSelectedTestPaths();
+				if(selectedTestPaths != null)
+					if(!selectedTestPaths.isEmpty())
+						setPathStatus();
+					else
+						cleanPathStatus();
+			} else
+				cleanPathStatus();
 		} else if(data instanceof TestPathChangedEvent) 
 			cleanPathStatus();
 	}

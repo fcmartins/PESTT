@@ -24,21 +24,26 @@ public class TouringHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		if(!flag)
-			if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
-				option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
-				if(option != null && !option.equals(Description.NONE)) {
-					HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
-					old = option;
-				} else if(option == null && old.equals(Layer.EMPTY.toString()))
-					old = (String) event.getCommand().getState("org.eclipse.ui.commands.radioState").getValue();
-				Activator.getDefault().getTestPathController().selectTourType(old);
+			if(Activator.getDefault().getEditorController().isEverythingMatching()) {
+				if(Activator.getDefault().getSourceGraphController().numberOfNodes() >= 1) {
+					option = event.getParameter(RadioState.PARAMETER_ID); // get the current selected state.
+					if(option != null && !option.equals(Description.NONE)) {
+						HandlerUtil.updateRadioState(event.getCommand(), option); // update the current state.
+						old = option;
+					} else if(option == null && old.equals(Layer.EMPTY.toString()))
+						old = (String) event.getCommand().getState("org.eclipse.ui.commands.radioState").getValue();
+					Activator.getDefault().getTestPathController().selectTourType(old);
+				} else {
+					flag = true;
+					MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
+				}
 			} else {
 				flag = true;
-				IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.DRAW_GRAPH_MSG); // message displayed when the graph is not designed.
+				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
 			}
-		else if(flag)
+		else
 			flag = false;
 		return null;
 	}

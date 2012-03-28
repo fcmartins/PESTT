@@ -12,10 +12,12 @@ import java.util.Set;
 
 import main.activator.Activator;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.zest.core.widgets.GraphConnection;
@@ -25,6 +27,7 @@ import org.eclipse.zest.core.widgets.ZestStyles;
 
 import ui.constants.Colors;
 import ui.constants.Description;
+import ui.constants.Messages;
 import ui.events.LayerChangeEvent;
 import ui.events.LinkChangeEvent;
 import adt.graph.AbstractPath;
@@ -166,18 +169,33 @@ public class Graph implements Observer {
 		if(data instanceof CFGCreateEvent) {
 			create(((CFGCreateEvent) data).sourceGraph);
 			bringGraphToTop();
+			Activator.getDefault().getEditorController().everythingMatch();
 		} else if(data instanceof TestRequirementSelectedEvent) {
-			if(((TestRequirementSelectedEvent) data).selectedTestRequirement == null) {
+			if(Activator.getDefault().getEditorController().isEverythingMatching())
+				if(((TestRequirementSelectedEvent) data).selectedTestRequirement == null) {
+					unselectAll();
+					Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
+				} else
+					selectTestRequirement(((TestRequirementSelectedEvent) data));
+			else {
 				unselectAll();
 				Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
-			} else
-				selectTestRequirement(((TestRequirementSelectedEvent) data));
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
+			}
 		} else if(data instanceof TestPathSelectedEvent) {
-			if(((TestPathSelectedEvent) data).selectedTestPaths == null) {
+			if(Activator.getDefault().getEditorController().isEverythingMatching()) 
+				if(((TestPathSelectedEvent) data).selectedTestPaths == null) {
+					unselectAll();
+					Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
+				} else
+					selectTestPath(((TestPathSelectedEvent) data));
+			else {
 				unselectAll();
 				Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
-			} else
-				selectTestPath(((TestPathSelectedEvent) data));
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
+			}
 		} else if(data instanceof LinkChangeEvent) {
 			if(((LinkChangeEvent) data).state) {
 				Activator.getDefault().getEditorController().creatorSelectToEditor(); // create the SelectionListener to the editor.
@@ -215,7 +233,6 @@ public class Graph implements Observer {
 		setSelected(items); // the list of selected items.
 		Activator.getDefault().getEditorController().setVisualCoverage(data);
 	}
-	
 	
 	private List<GraphItem> selectInGraph(AbstractPath<Integer> selectedTestRequirement) {
 		List<GraphItem> aux = new LinkedList<GraphItem>();
@@ -270,10 +287,17 @@ public class Graph implements Observer {
 			public void widgetSelected(SelectionEvent e) {
 				if(e.item != null && e.item instanceof GraphNode ) {
 					getSelected();
-					Activator.getDefault().getEditorController().setLayerInformation(Layer.INSTRUCTIONS);
+					if(Activator.getDefault().getEditorController().isEverythingMatching())
+						Activator.getDefault().getEditorController().setLayerInformation(Layer.INSTRUCTIONS);
+					else {
+						IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+						MessageDialog.openInformation(window.getShell(), Messages.DRAW_GRAPH_TITLE, Messages.GRAPH_UPDATE_MSG);
+					}
 				} else if(e.item == null) {
+					Activator.getDefault().getEditorController().setListenUpdates(false);
 					Activator.getDefault().getEditorController().removeALLMarkers(); // removes the marks in the editor.
 					Activator.getDefault().getTestPathController().unSelect();
+					Activator.getDefault().getEditorController().setListenUpdates(true);
 				}	
 			}
 		};	

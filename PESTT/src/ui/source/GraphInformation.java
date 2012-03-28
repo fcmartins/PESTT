@@ -8,6 +8,9 @@ import java.util.Map.Entry;
 
 import main.activator.Activator;
 
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -186,19 +189,46 @@ public class GraphInformation {
 			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				if(selection instanceof ITextSelection && !Activator.getDefault().getEditorController().isDirty()) {				
+				if(selection instanceof ITextSelection && Activator.getDefault().getEditorController().isEverythingMatching()) {				
 					ITextSelection textSelected = (ITextSelection) selection; // get the text selected in the editor.
-					selectNode(textSelected.getOffset());
-				} else
-					Activator.getDefault().getEditorController().removeALLMarkers();
+					String currentMethod = getSelectedMethod(textSelected);
+					if(currentMethod != null) {
+						if(textSelected.getLength() != 0 && currentMethod.equals(Activator.getDefault().getEditorController().getSelectedMethod())) {
+							selectNode(textSelected.getOffset());
+							return;
+						}
+					}
+				}
+				Activator.getDefault().getEditorController().removeALLMarkers();
+				GraphItem[] items = {};
+				layoutGraph.setSelected(items);
 			}
 		};
 		page.addSelectionListener(listener);
+		
 	}
 	
 	public void removeSelectToEditor() {
-		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(); // get the active page.
-		page.removeSelectionListener(listener); // remove the listener.
+		if(listener != null) {
+			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(); // get the active page.
+			page.removeSelectionListener(listener); // remove the listener.
+		}
+	}
+	
+	private String getSelectedMethod(ITextSelection textSelected) {
+		try {
+			for(IType type : Activator.getDefault().getEditorController().getCompilationUnit().getAllTypes())
+				for(IMethod method : type.getMethods()) {
+					int cursorPosition = textSelected.getOffset();
+					int methodStart = method.getSourceRange().getOffset();
+					int methodEnd = method.getSourceRange().getOffset() + method.getSourceRange().getLength();
+					if(methodStart <= cursorPosition && cursorPosition <= methodEnd)
+						return method.getElementName();
+				}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
